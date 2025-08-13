@@ -37,16 +37,31 @@ app.get('/math', async (req, res) => {
   }
 });
 
-// AI route (Gemini) with word limit
+// AI route (Gemini) with context-aware handling
 app.post('/ai', async (req, res) => {
   let userPrompt = req.body.prompt;
+  const questionType = req.body.questionType || 'general';
 
   if (!userPrompt) {
     return res.status(400).json({ error: "Prompt is required" });
   }
 
+  // Create context-aware prompts based on question type
+  let enhancedPrompt = userPrompt;
+  
+  if (questionType === 'math') {
+    enhancedPrompt = `You are a math tutor. Please solve this math problem step by step: "${userPrompt}". 
+    Show your work clearly and provide the final answer. Keep it concise but thorough.`;
+  } else if (questionType === 'general') {
+    enhancedPrompt = `You are a helpful AI assistant. Please answer this question: "${userPrompt}". 
+    Provide a clear, informative response.`;
+  } else if (questionType === 'mixed') {
+    enhancedPrompt = `You are a versatile AI assistant. This question may involve both math and general knowledge: "${userPrompt}". 
+    Please provide a comprehensive answer that addresses all aspects.`;
+  }
+
   // Add length constraint to the prompt
-  userPrompt += "\nPlease respond in under 30 words.";
+  enhancedPrompt += "\nPlease respond in under 50 words.";
 
   try {
     const geminiRes = await fetch(
@@ -58,7 +73,7 @@ app.post('/ai', async (req, res) => {
           "X-goog-api-key": process.env.GEMINI_API_KEY
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: userPrompt }] }]
+          contents: [{ parts: [{ text: enhancedPrompt }] }]
         })
       }
     );

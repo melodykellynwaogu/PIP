@@ -4,30 +4,45 @@
     <!-- Added meta tags for better SEO and mobile experience -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Get instant answers to your math problems with AI">
-    <title>Math AI Assistant</title>
+    <meta name="description" content="Get instant answers to your math problems and general questions with AI">
+    <title>AI Assistant - Math & General Questions</title>
     <!-- Preloaded fonts for better performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Added favicon cdn -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     <!-- CSS link-style-sheet-->
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <div class="card-container">
-        <h1>Math AI Assistant</h1>
+        <h1 id="main-title">AI Assistant</h1>
+        <p id="subtitle">Ask me anything - math problems, general questions, or anything else!</p>
+        
+        <div class="question-type-selector">
+            <button class="type-btn active" data-type="auto">🤖 Auto Detect</button>
+            <button class="type-btn" data-type="math">🧮 Math Focus</button>
+            <button class="type-btn" data-type="general">💭 General Q&A</button>
+        </div>
+
         <div class="input-area">
-            <input type="text" id="question" placeholder="Type your math problem here..." aria-label="Math problem input" />
+            <input type="text" id="question" placeholder="Type your question here..." aria-label="Question input" />
             <button id="ask-ai" aria-label="Ask AI">
                 <span>Ask AI ✨</span>
             </button>
         </div>
+        
         <div class="response-area">
-            <p id="ai-response">Your solution will appear here!</p>
+            <div id="question-type-indicator" class="question-type-indicator"></div>
+            <div id="ai-response">Your answer will appear here!</div>
+        </div>
+
+        <div class="footer">
+            &copy; Copyright 2025. Built with ❤ - All Right Reserved.
         </div>
     </div>
+    
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -35,28 +50,109 @@
             const questionInput = document.getElementById('question');
             const aiResponseElem = document.getElementById('ai-response');
             const responseArea = document.querySelector('.response-area');
+            const typeBtns = document.querySelectorAll('.type-btn');
+            const questionTypeIndicator = document.getElementById('question-type-indicator');
+            const mainTitle = document.getElementById('main-title');
+            const subtitle = document.getElementById('subtitle');
+
+            let selectedType = 'auto';
+
+            // Question type for detection of each seg patterns
+            const mathPatterns = [
+                /\d[\+\-\*\/\^\(\)\=]/,
+                /\b(solve|calculate|compute|find|evaluate|simplify|factor|integrate|differentiate|equation|formula)\b/i,
+                /\b(algebra|geometry|calculus|trigonometry|statistics|probability)\b/i,
+                /[0-9]+\s*[\+\-\*\/]\s*[0-9]+/,
+                /\b(percent|percentage|ratio|proportion)\b/i
+            ];
+
+            const generalPatterns = [
+                /\b(what|how|why|when|where|who|which|explain|describe|tell me about)\b/i,
+                /\b(history|science|technology|culture|philosophy|literature)\b/i,
+                /\b(definition|meaning|concept|theory|principle)\b/i
+            ];
+
+            // Question type detection function
+            function detectQuestionType(question) {
+                const hasMathPatterns = mathPatterns.some(pattern => pattern.test(question));
+                const hasGeneralPatterns = generalPatterns.some(pattern => pattern.test(question));
+                
+                if (hasMathPatterns && !hasGeneralPatterns) return 'math';
+                if (hasGeneralPatterns && !hasMathPatterns) return 'general';
+                if (hasMathPatterns && hasGeneralPatterns) return 'mixed';
+                return 'general'; // default to general if unclear
+            }
+
+            // Update UI based on question type
+            function updateUIForQuestionType(type) {
+                const typeLabels = {
+                    'math': '🧮 Math Question',
+                    'general': '💭 General Question',
+                    'mixed': '🤖 Mixed Question',
+                    'auto': '🤖 Auto Detect'
+                };
+
+                // Show indicator for manual modes (math, general) or detected types
+                if (type === 'math' || type === 'general' || type === 'mixed') {
+                    questionTypeIndicator.textContent = typeLabels[type];
+                    questionTypeIndicator.style.display = 'block';
+                    
+                    // Update input placeholder
+                    if (type === 'math') {
+                        questionInput.placeholder = 'Type your math problem here... (e.g., 2x + 5 = 15)';
+                    } else if (type === 'general') {
+                        questionInput.placeholder = 'Ask me anything... (e.g., What is photosynthesis?)';
+                    }
+                } else if (type === 'auto') {
+                    // Hide indicator for auto mode unless there's a detected type
+                    questionTypeIndicator.style.display = 'none';
+                    questionInput.placeholder = 'Type your question here...';
+                }
+            }
+
+            // Type button event listeners
+            typeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    typeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedType = btn.dataset.type;
+                    updateUIForQuestionType(selectedType);
+                });
+            });
 
             if (askAiBtn && questionInput && aiResponseElem) {
                 askAiBtn.addEventListener('click', async () => {
                     const question = questionInput.value.trim(); 
 
                     if (!question) {
-                        aiResponseElem.textContent = "Please enter a math problem before asking!";
+                        aiResponseElem.textContent = "Please enter a question before asking!";
                         aiResponseElem.style.color = 'var(--accent-red)'; 
                         return;
                     }
+
+                    // Detect question type if auto mode
+                    let questionType = selectedType;
+                    if (selectedType === 'auto') {
+                        questionType = detectQuestionType(question);
+                    }
+
+                    // Update UI for detected type
+                    updateUIForQuestionType(questionType);
 
                     // Set loading states
                     askAiBtn.classList.add('loading');
                     responseArea.classList.add('loading');
                     aiResponseElem.style.color = 'var(--text-secondary)'; 
-                    aiResponseElem.textContent = 'Solving your problem...';
+                    aiResponseElem.textContent = questionType === 'math' ? 'Solving your problem...' : 'Thinking...';
                     
                     try {
                         const response = await fetch('http://localhost:4000/ai', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ prompt: question })
+                            body: JSON.stringify({ 
+                                prompt: question,
+                                questionType: questionType
+                            })
                         });
 
                         if (!response.ok) {
@@ -65,7 +161,7 @@
 
                         const data = await response.json();
                         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-                                        'No solution found. Please try a different problem.';
+                                        'No answer found. Please try a different question.';
                         
                         // Typewriter effect for response
                         typeWriterEffect(aiResponseElem, aiText);
@@ -84,6 +180,19 @@
                 questionInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         askAiBtn.click();
+                    }
+                });
+
+                // Real-time question type detection for auto mode
+                questionInput.addEventListener('input', () => {
+                    if (selectedType === 'auto') {
+                        const question = questionInput.value.trim();
+                        if (question) {
+                            const detectedType = detectQuestionType(question);
+                            updateUIForQuestionType(detectedType);
+                        } else {
+                            questionTypeIndicator.style.display = 'none';
+                        }
                     }
                 });
             }
