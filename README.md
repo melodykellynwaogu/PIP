@@ -68,13 +68,12 @@ Based on the detected question type, the AI receives specialized prompts:
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
-3. Start the proxy server:
+3. Start the proxy server on your terminal:
    ```bash
    node proxy-server.js
    ```
-4. Start the server `Node proxy-server.js` and...
 
-5. Open `index.html` in your browser
+4. Finally Open `index.html` in your browser!
 
 ## Technical Details
 
