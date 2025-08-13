@@ -1,135 +1,235 @@
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #1a202c; 
-    color: #cbd5e1; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; 
-    margin: 0;
-    padding: 20px; 
-    box-sizing: border-box; 
+/* CSS variables == theming */
+:root {
+  --bg-primary: #1a202c;
+  --bg-secondary: #2d3748;
+  --bg-tertiary: #4a5568;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --accent-blue: #63b3ed;
+  --accent-green: #48bb78;
+  --accent-green-hover: #38a169;
+  --accent-red: #ef4444;
+  --transition-speed: 0.3s;
 }
 
+/*  this is for smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
 
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card container -- subtle animation on load */
 .card-container {
-    background-color: #2d3748; 
-    padding: 30px;
-    border-radius: 15px; 
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    width: 100%; 
-    text-align: center;
-    border: 1px solid #4a5568; 
+  background-color: var(--bg-secondary);
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+  border: 1px solid var(--bg-tertiary);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
 h1 {
-    font-size: 2.5rem; 
-    color: #63b3ed; 
-    margin-bottom: 25px;
-    font-weight: 700;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  color: var(--accent-blue);
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-
+/* The input area with responsive layout/design */
 .input-area {
-    display: flex;
-    flex-direction: column; 
-    margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-
+/* Enhanced input field with better focusing states */
 #question {
-    padding: 12px 18px;
-    border-radius: 8px; 
-    border: 2px solid #4a5568;
-    background-color: #1a202c; 
-    color: #e2e8f0; 
-    font-size: 1rem;
-    width: 100%; 
-    box-sizing: border-box;
-    outline: none; 
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  border: 2px solid var(--bg-tertiary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: all var(--transition-speed) ease;
 }
 
 #question:focus {
-    border-color: #63b3ed; 
-    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5); 
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3);
 }
 
 
+/* Beginning - Button with loading state when trigggered*/
 #ask-ai {
-    padding: 12px 25px;
-    background-color: #48bb78; 
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; 
-    box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3); 
-    letter-spacing: 0.5px; 
+  padding: 0.8rem 1.5rem;
+  background-color: var(--accent-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
 }
 
-#ask-ai:hover {
-    background-color: #38a169; 
-    transform: translateY(-2px); 
-    box-shadow: 0 6px 15px rgba(72, 187, 120, 0.4); 
+#ask-ai:hover:not(.loading) {
+  background-color: var(--accent-green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(72, 187, 120, 0.4);
 }
 
-#ask-ai:active {
-    background-color: #2f855a;
-    transform: translateY(0); 
-    box-shadow: 0 2px 5px rgba(72, 187, 120, 0.3); 
+#ask-ai:active:not(.loading) {
+  transform: translateY(0);
 }
 
+/* Loading spinner for button */
+#ask-ai.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 3px solid transparent;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#ask-ai.loading span {
+  visibility: hidden;
+}
+/* Ending - Button with loading state when trigggered*/
+
+
+
+
+/* Implemented -- skeleton loading */
 .response-area {
-    background-color: #1a202c; 
-    padding: 20px;
-    border-radius: 10px;
-    min-height: 80px; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: left; 
-    word-wrap: break-word;
-    line-height: 1.6;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2); 
+  background-color: var(--bg-primary);
+  padding: 1.5rem;
+  border-radius: 10px;
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  word-wrap: break-word;
+  line-height: 1.6;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Also implemented a skeleton loading animation */
+.response-area.loading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(26, 32, 44, 0) 0%,
+    rgba(74, 85, 104, 0.2) 50%,
+    rgba(26, 32, 44, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 #ai-response {
-    font-size: 1.05rem;
-    color: #e2e8f0; 
+  font-size: 1rem;
+  color: var(--text-primary);
+  width: 100%;
 }
 
-
+/* media queries */
 @media (min-width: 600px) {
-    .input-area {
-        flex-direction: row;
-    }
+  .input-area {
+    flex-direction: row;
+  }
 
-    #question {
-        flex-grow: 1;
-    }
-
-    #ask-ai {
-        width: auto;
-        min-width: 120px; 
-    }
+  #ask-ai {
+    min-width: 140px;
+    margin-left: 1rem;
+  }
 }
 
-
+/* scrollbar for content overflow --- Adjusted! */
 ::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #1a202c; 
+  background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-    background-color: #4a5568; 
-    border-radius: 4px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #718096; 
+  background-color: #718096;
 }
+
+/* Accessibility focus styles */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+
+/* Other UI will be Implemented later...........*/

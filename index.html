@@ -1,74 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Added meta tags for better SEO and mobile experience -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safe AI Example</title>
-    <link rel="stylesheet" href="index.css">
+    <meta name="description" content="Get instant answers to your math problems with AI">
+    <title>Math AI Assistant</title>
+    <!-- Preloaded fonts for better performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Added favicon cdn -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+    <!-- CSS link-style-sheet-->
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <div class="card-container">
-        <h1>Random Math Problem</h1>
+        <h1>Math AI Assistant</h1>
         <div class="input-area">
-            <input type="text" id="question" placeholder="Type your question here..." />
-            <button id="ask-ai">Ask AI ✨</button>
+            <input type="text" id="question" placeholder="Type your math problem here..." aria-label="Math problem input" />
+            <button id="ask-ai" aria-label="Ask AI">
+                <span>Ask AI ✨</span>
+            </button>
         </div>
         <div class="response-area">
-            <p id="ai-response">Your AI answer will appear here!</p>
+            <p id="ai-response">Your solution will appear here!</p>
         </div>
     </div>
 
     <script>
-        
         document.addEventListener('DOMContentLoaded', () => {
             const askAiBtn = document.getElementById('ask-ai');
             const questionInput = document.getElementById('question');
             const aiResponseElem = document.getElementById('ai-response');
+            const responseArea = document.querySelector('.response-area');
 
             if (askAiBtn && questionInput && aiResponseElem) {
-                askAiBtn.addEventListener('click', () => {
+                askAiBtn.addEventListener('click', async () => {
                     const question = questionInput.value.trim(); 
 
                     if (!question) {
-                        aiResponseElem.textContent = "Please type a question before asking!";
-                        aiResponseElem.style.color = '#ef4444'; 
+                        aiResponseElem.textContent = "Please enter a math problem before asking!";
+                        aiResponseElem.style.color = 'var(--accent-red)'; 
                         return;
                     }
 
+                    // Set loading states
+                    askAiBtn.classList.add('loading');
+                    responseArea.classList.add('loading');
+                    aiResponseElem.style.color = 'var(--text-secondary)'; 
+                    aiResponseElem.textContent = 'Solving your problem...';
                     
-                    aiResponseElem.style.color = '#cbd5e1'; 
-                    aiResponseElem.textContent = 'Thinking... 🤔'; 
+                    try {
+                        const response = await fetch('http://localhost:4000/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: question })
+                        });
 
-                    
-                    fetch('http://localhost:4000/ai', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: question })
-                    })
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error(`HTTP error! Status: ${res.status}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
                         }
-                        return res.json();
-                    })
-                    .then(data => {
-                        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No answer found. Please try again.';
-                        aiResponseElem.textContent = aiText;
-                    })
-                    .catch(err => {
-                        console.error('Error fetching AI response:', err);
-                        aiResponseElem.textContent = `Error: Could not get an answer. Make sure your server is running!`;
-                        aiResponseElem.style.color = '#ef4444'; 
-                    });
+
+                        const data = await response.json();
+                        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+                                        'No solution found. Please try a different problem.';
+                        
+                        // Typewriter effect for response
+                        typeWriterEffect(aiResponseElem, aiText);
+                    } catch (err) {
+                        console.error('Error:', err);
+                        aiResponseElem.textContent = `Error: ${err.message || 'Could not connect to the AI service'}`;
+                        aiResponseElem.style.color = 'var(--accent-red)';
+                    } finally {
+                        // Remove loading states
+                        askAiBtn.classList.remove('loading');
+                        responseArea.classList.remove('loading');
+                    }
                 });
-            } else {
-                console.error("One or more required elements not found in the DOM.");
+
+                // Add enter key support
+                questionInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        askAiBtn.click();
+                    }
+                });
+            }
+
+            function typeWriterEffect(element, text, speed = 20) {
+                let i = 0;
+                element.textContent = '';
+                
+                function type() {
+                    if (i < text.length) {
+                        element.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    }
+                }
+                
+                type();
             }
         });
     </script>
 </body>
 </html>
-
